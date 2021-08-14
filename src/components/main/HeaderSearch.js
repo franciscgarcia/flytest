@@ -51,6 +51,7 @@ class HeaderSearch extends Component {
             placeholder="Search"
             onFocus={this.focus.bind(this)}
             onBlur={this.unfocus.bind(this)}
+            onChange={(event) => this.props.search(event.target.value)}
           />
         </Box>
       </div>

@@ -67,6 +67,7 @@ class FlightCard extends Component {
       <div style={styles.container}
         onMouseOver={this.hover.bind(this)}
         onMouseLeave={this.unhover.bind(this)}
+        onClick={this.props.onClick}
       >
         <Box style={styles.card}>
           {this.renderFlight(details)}
