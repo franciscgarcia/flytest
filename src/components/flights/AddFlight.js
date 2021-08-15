@@ -134,7 +134,8 @@ class AddFlight extends Component {
           date: moment(date).startOf('day').toDate().toString(),
           poster: userRef
         })
-        await this.props.firebase.addPost(this.props.userId, flightRef)
+
+        await this.props.firebase.addPost(this.props.userId, flightRef) 
 
         this.setState({ loading: false, success: true })
       }
@@ -181,7 +182,7 @@ class AddFlight extends Component {
           style={!!country ? { ...styles.selectCountry, width: 240 } : styles.selectCountry}
           label="Departure Country"
           labelWidth={135}
-          value={country}
+          value={ country ? country : '' }
           onChange={(event) => this.setState({ orgCountry: event.target.value })}
         >
           <option />
@@ -192,7 +193,7 @@ class AddFlight extends Component {
             style={styles.selectAirport}
             label="Airport"
             labelWidth={47}
-            value={airport}
+            value={ airport ? airport : '' }
             onChange={(event) => this.setState({ orgAirport: event.target.value })}
           >
             <option />
@@ -210,7 +211,7 @@ class AddFlight extends Component {
           style={!!country ? { ...styles.selectCountry, width: 240 } : styles.selectCountry}
           label="Arrival Country"
           labelWidth={110}
-          value={country}
+          value={ country ? country : '' }
           onChange={(event) => this.setState({ destCountry: event.target.value })}
         >
           <option />
@@ -221,7 +222,7 @@ class AddFlight extends Component {
             style={styles.selectAirport}
             label="Airport"
             labelWidth={47}
-            value={airport}
+            value={ airport ? airport : '' }
             onChange={(event) => this.setState({ destAirport: event.target.value })}
           >
             <option />

@@ -120,13 +120,26 @@ class Flights extends Component {
   }
 
   async addVote(flight){
-    this.setState({ loading: true })
+    this.setState({ loading: true });
+    
     const flightsRef = this.props.firebase.flights()
     const flightRef = await flightsRef.doc(_.get(flight, 'id'))
+    const userRef = await this.props.firebase.user(this.props.userId)
 
-    await flightRef.update({
-      current : _.get(flight, 'current') + 1,
+    let userFlights = await userRef.get().then(userData => {
+      return userData.data().posts;
     })
+
+    let flightIds = userFlights.map(e => e.id);
+
+    if(!flightIds.includes(_.get(flight, 'id'))) {
+      await flightRef.update({
+        current : _.get(flight, 'current') + 1,
+      })
+    }
+    else {
+      alert("Already voted!");
+    }
 
     this.setState({ loading: false })
   }
@@ -134,9 +147,15 @@ class Flights extends Component {
 
 const condition = authUser => !!authUser;
 
-export default connect()(
-  compose(
+const mapStateToProps = (state) => { 
+  return ({
+    userId: state.auth.user.uid
+  })
+}
+
+export default compose(
     withRouter,
     withFirebase,
     withAuthorization(condition),
-  )(Flights))
+    connect(mapStateToProps)
+  )(Flights)
