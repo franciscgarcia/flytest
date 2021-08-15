@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withFirebase } from '../../firebase'
-import { Dialog, DialogTitle, Divider, DialogActions, Button } from '@material-ui/core'
+import { Dialog, DialogTitle, DialogActions, Button } from '@material-ui/core'
 
 const styles = {
   warningMessage: {
@@ -9,7 +9,6 @@ const styles = {
     minHeight: '85px',
     width: '85%',
     padding: '0 7%',
-
   }
 }
 
