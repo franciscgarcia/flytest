@@ -20,7 +20,7 @@ class Main extends Component {
   render() {
     return (
       <div >
-        <Header search={(searchKey) => this.props.setSearch(searchKey)} />
+        <Header search={(searchKey) => this.props.searchKey(searchKey)} />
         <div style={{ ...styles.container, backgroundColor: this.props.backgroundColor }}>
           {this.props.children}
         </div>

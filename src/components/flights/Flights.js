@@ -5,10 +5,11 @@ import { withFirebase } from '../../firebase'
 import { withRouter } from 'react-router-dom'
 import { compose } from 'redux'
 import { Icon } from '@mdi/react'
-import { mdiPlus } from '@mdi/js'
+import { mdiPlus, mdiDelete, mdiPencil } from '@mdi/js'
 import { Main } from '../'
-import { FlightCard, AddFlight } from '.'
+import { FlightCard, AddFlight, EditFlight } from '.'
 import airport from 'airport-codes'
+import * as _ from 'lodash';
 
 class Flights extends Component {
 
@@ -17,27 +18,58 @@ class Flights extends Component {
       icon: <Icon path={mdiPlus} size={1} />,
       onClick: () => this.setState({ openFlight: true })
     }
+  ]  
+
+  updateDelete = [
+    {
+      icon: <Icon path={mdiPencil} size={1} />,
+      onClick: (e, details) => {
+        e.stopPropagation();
+        console.log(details);
+        this.setState({ editFlight: true, details: details });
+      }
+    },
+    {
+      icon: <Icon path={mdiDelete} size={1} />,
+      onClick: (e, details) => {
+        e.stopPropagation();
+        console.log(details);
+        this.setState({ deleteFlight: true, details: details });
+      }
+    },
   ]
 
   state = {
     loading: false,
     flights: null,
     openFlight: false,
+    editFlight: false,
+    deleteFlight: false,
     searchKey : null,
+    details: null,
   }
 
   componentDidMount() {
     this.setState({ loading: true })
     const flightsRef = this.props.firebase.flights()
-    flightsRef.onSnapshot(snapshot => this.setState({ flights: snapshot.docs, loading: false }))
+    flightsRef.orderBy("current", "desc").onSnapshot(snapshot => this.setState({ flights: snapshot.docs, loading: false }))
   }
 
   render() {
-    const { flights, openFlight } = this.state
+    const { flights, openFlight, editFlight, details } = this.state
     return (
-      <Main actions={this.actions} setSearch={(searchKey) => this.searchFlight(searchKey)}>
+      <Main actions={this.actions} searchKey={(searchKey) => this.triggerSearch(searchKey)}>
         {this.renderFlightCards(flights)}
+        
         <AddFlight open={openFlight} onClose={() => this.setState({ openFlight: false })} />
+
+        { 
+          editFlight && <EditFlight details={details} open={editFlight} onClose={() => this.setState({ editFlight: false })} />
+        }
+
+        {/* { 
+          deleteFlight && <DeleteFlight details={details} open={deleteFlight} onClose={() => this.setState({ deleteFlight: false })} />
+        } */}
       </Main>
     )
   }
@@ -45,7 +77,7 @@ class Flights extends Component {
   renderFlightCards(flights) {
     if (flights) {
       return flights.map((flight) => {
-        let flightData = {
+        let details = {
           id : flight.id,
           current : flight.data().current,
           origin : flight.data().origin,
@@ -56,29 +88,29 @@ class Flights extends Component {
           destCountry : this.getCountry(flight.data().destination),
           destAirport : this.getAirport(flight.data().destination)
         }
-        return flightData
+        return details
       })
       .filter(flight => {
         let searchKey = this.state.searchKey
-        return !searchKey ? true : 
-              (flight.origin.toLowerCase().includes(searchKey.toLowerCase()) ||
-              flight.destination.toLowerCase().includes(searchKey.toLowerCase()) ||
-              flight.orgCountry.toLowerCase().includes(searchKey.toLowerCase()) ||
-              flight.orgAirport.toLowerCase().includes(searchKey.toLowerCase()) ||
-              flight.destCountry.toLowerCase().includes(searchKey.toLowerCase()) ||
-              flight.destAirport.toLowerCase().includes(searchKey.toLowerCase()));
-      })      
-      .sort((a,b) => {
-        return b.current - a.current
-      })
+        return !searchKey ? true : this.filterFlights(flight, searchKey);
+      }) 
       .map((flight) => {
-        return <FlightCard details={flight} onClick={() => this.addVote(flight)} />
+        return <FlightCard actions={this.updateDelete} details={flight} onClick={() => this.addVote(flight)} />
       })
     }
   }
   
-  searchFlight(searchKey){
+  triggerSearch(searchKey){
     this.setState({ searchKey : searchKey, loading : true });
+  }
+
+  filterFlights(flight, searchKey) {
+    return (flight.origin.toLowerCase().includes(searchKey.toLowerCase()) ||
+    flight.destination.toLowerCase().includes(searchKey.toLowerCase()) ||
+    flight.orgCountry.toLowerCase().includes(searchKey.toLowerCase()) ||
+    flight.orgAirport.toLowerCase().includes(searchKey.toLowerCase()) ||
+    flight.destCountry.toLowerCase().includes(searchKey.toLowerCase()) ||
+    flight.destAirport.toLowerCase().includes(searchKey.toLowerCase()));
   }
   
   getCountry(iata) {
@@ -92,11 +124,10 @@ class Flights extends Component {
   async addVote(flight){
     this.setState({ loading: true })
     const flightsRef = this.props.firebase.flights()
-    const flightRef = await flightsRef.doc(flight.id)
+    const flightRef = await flightsRef.doc(_.get(flight, 'id'))
 
     await flightRef.update({
-      // current : 40,
-      current : flight.current + 1,
+      current : _.get(flight, 'current') + 1,
     })
 
     this.setState({ loading: false })

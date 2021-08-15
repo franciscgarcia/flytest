@@ -52,6 +52,7 @@ const styles = {
 const initialState = {
   loading: false,
   success: false,
+  id: null,
   destCountry: null,
   destAirport: null,
   orgCountry: null,
@@ -73,16 +74,26 @@ class EditFlight extends Component {
     })
   }
 
-  render() {
-    const { open, details } = this.props
-    const { loading, success, countries, destCountry, destAirport, orgCountry, orgAirport, date } = this.state
-   
-    console.log("details: ", details)
+  componentDidMount() {
+    const { details } = this.props
+    let loadedDetail = {
+      id: details.id,
+      date: new Date(details.date),
+      orgCountry : details.orgCountry,
+      orgAirport : details.orgAirport,
+      destCountry : details.destCountry,
+      destAirport : details.destAirport
+    }
+    this.setState(loadedDetail)
+  }
 
+  render() {
+    const { open } = this.props
+    const { loading, success, id, countries, destCountry, destAirport, orgCountry, orgAirport, date } = this.state
+   
     return (     
       <Dialog
         open={open}
-        details={details}
         onClose={this.handleClose.bind(this)}
         maxWidth={false}
       >
@@ -111,7 +122,7 @@ class EditFlight extends Component {
                 variant={success ? "outlined" : "contained"}
                 color={success ? "secondary" : "primary"}
                 disabled={loading}
-                onClick={() => this.postFlight(orgAirport, destAirport, date)}
+                onClick={() => this.editFlight(id, orgAirport, destAirport, date)}
               >
                 {success ? 'POSTED' : 'POST'}
                 {loading && <CircularProgress size={24} style={styles.buttonProgress} />}
@@ -123,12 +134,12 @@ class EditFlight extends Component {
     )
   }
 
-  async postFlight(origin, destination, date) {
+  async editFlight(id, origin, destination, date) {
     if (!this.state.success) {
       if (origin && destination && date) {
         this.setState({ loading: true })
         const flightsRef = this.props.firebase.flights()
-        const flightRef = await flightsRef.doc()
+        const flightRef = await flightsRef.doc(id)
         const userRef = await this.props.firebase.user(this.props.userId)
 
         await flightRef.update({          
@@ -172,16 +183,6 @@ class EditFlight extends Component {
   getAirport(iata){
     return airport.findWhere({ iata: iata }).get('name');
   }
-
-  // renderFlights(origin, destination, date) {
-  //   const flightsRef = this.props.firebase.flights()
-  //   const filteredFlights = flightsRef
-  //     .where('origin', '==', this.getIata(origin))
-  //     .where('destination', '==', this.getIata(destination))
-  //     .where('date', '==', moment(date).startOf('day').toDate().toString())
-  //     .get()
-  //     .then((snapshot) => console.log(snapshot.docs))
-  // }
 
   renderOrigin(countries, country, airport) {
     return (

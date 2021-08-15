@@ -4,7 +4,7 @@ import Icon from '@mdi/react'
 import airport from 'airport-codes'
 import moment from 'moment'
 import { mdiAirplane } from '@mdi/js'
-import { Box } from '@material-ui/core'
+import { Box, Fab } from '@material-ui/core'
 import { Overlay } from '.'
 import { grey } from '@material-ui/core/colors'
 
@@ -14,8 +14,9 @@ const cardWidth = 236
 const styles = {
   overlay: {
     borderRadius: 10,
-    background: 'rgba(0,0,0,0.1)',
+    background: 'rgba(0,0,100,.1)',
     height: '100%',
+    cursor: 'pointer'
   },
   overlayHidden: {
     transform: `scale(0.8) translateY(-${cardHeight * 1.2}px)`
@@ -57,7 +58,7 @@ const styles = {
 class FlightCard extends Component {
 
   state = {
-    hovered: false
+    hovered: false,
   }
 
   render() {
@@ -73,6 +74,17 @@ class FlightCard extends Component {
           {this.renderFlight(details)}
         </Box>
         <Overlay show={hovered} style={styles.overlay} styleShown={styles.overlayShown} styleHidden={styles.overlayHidden} />
+
+        {/* Edit and Delete buttons */}
+        <div style={{ position: 'absolute', bottom: -20, right: -20, display: 'flex', flexDirection: 'row', zIndex: 99 }}>
+          {
+            this.props.actions ? this.props.actions.map((action) => {
+              return hovered && <Fab style={{ height: 40, width: 40, margin: '5px 5px' }} color={action.color} onClick={(e) => action.onClick(e, details)}>
+                {action.icon}
+              </Fab>
+            }) : null
+          }
+        </div>
       </div>
     )
   }
@@ -117,7 +129,6 @@ class FlightCard extends Component {
   formatAirport(airport) {
     return airport.replace(/\b(\w*Intl\w*)\b/g, "")
       .replace(/\b(\w*Airport\w*)\b/g, "")
-
   }
 
   hover() {
