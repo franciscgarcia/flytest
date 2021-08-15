@@ -3,7 +3,7 @@ import FlightCard from './FlightCard'
 import Overlay from './Overlay'
 import AddFlight from './AddFlight'
 import EditFlight from './EditFlight'
-// import DeleteFlight from './DeleteFlight'
+import DeleteFlight from './DeleteFlight'
 
 export {
   Flights,
@@ -11,5 +11,5 @@ export {
   Overlay,
   AddFlight,
   EditFlight,
-  // DeleteFlight,
+  DeleteFlight,
 }

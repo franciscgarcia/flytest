@@ -7,7 +7,7 @@ import { compose } from 'redux'
 import { Icon } from '@mdi/react'
 import { mdiPlus, mdiDelete, mdiPencil } from '@mdi/js'
 import { Main } from '../'
-import { FlightCard, AddFlight, EditFlight } from '.'
+import { FlightCard, AddFlight, EditFlight, DeleteFlight } from '.'
 import airport from 'airport-codes'
 import * as _ from 'lodash';
 
@@ -25,7 +25,6 @@ class Flights extends Component {
       icon: <Icon path={mdiPencil} size={1} />,
       onClick: (e, details) => {
         e.stopPropagation();
-        console.log(details);
         this.setState({ editFlight: true, details: details });
       }
     },
@@ -33,7 +32,6 @@ class Flights extends Component {
       icon: <Icon path={mdiDelete} size={1} />,
       onClick: (e, details) => {
         e.stopPropagation();
-        console.log(details);
         this.setState({ deleteFlight: true, details: details });
       }
     },
@@ -56,7 +54,7 @@ class Flights extends Component {
   }
 
   render() {
-    const { flights, openFlight, editFlight, details } = this.state
+    const { flights, openFlight, editFlight, deleteFlight, details } = this.state
     return (
       <Main actions={this.actions} searchKey={(searchKey) => this.triggerSearch(searchKey)}>
         {this.renderFlightCards(flights)}
@@ -67,9 +65,9 @@ class Flights extends Component {
           editFlight && <EditFlight details={details} open={editFlight} onClose={() => this.setState({ editFlight: false })} />
         }
 
-        {/* { 
-          deleteFlight && <DeleteFlight details={details} open={deleteFlight} onClose={() => this.setState({ deleteFlight: false })} />
-        } */}
+        { 
+          deleteFlight && <DeleteFlight id={details.id} open={deleteFlight} onClose={() => this.setState({ deleteFlight: false })} />
+        }
       </Main>
     )
   }
