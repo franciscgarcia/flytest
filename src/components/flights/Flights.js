@@ -45,6 +45,7 @@ class Flights extends Component {
     deleteFlight: false,
     searchKey : null,
     details: null,
+    hasVoted: false
   }
 
   componentDidMount() {
@@ -130,12 +131,16 @@ class Flights extends Component {
       return userData.data().posts;
     })
 
-    let flightIds = userFlights.map(e => e.id);
+    let flightIds = userFlights ? userFlights.map(e => e.id) : [];
 
-    if(!flightIds.includes(_.get(flight, 'id'))) {
+    if(!this.state.hasVoted && !flightIds.includes(_.get(flight, 'id'))) {
+      this.setState({ hasVoted: true });
+
       await flightRef.update({
         current : _.get(flight, 'current') + 1,
       })
+
+      await this.props.firebase.addPost(this.props.userId, flightRef);
     }
     else {
       alert("Already voted!");
